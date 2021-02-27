@@ -7,14 +7,14 @@ The repo is constantly updated as I follow the course [Three.js Journey](https:/
 <br>
 Each folder have their own README file where I note some key points down, and also use it as a reference place to find/copy&paste what I need. 
 
-**Lesson 1. [Basic scene](./tree/main/basic-scene)**
+**Lesson 1. [Basic scene](./basic-scene)**
 
 An introduction into Threejs: what are the main elements to create a scene.
 
-**Lesson 2. [Transform objects](./tree/main/transforming-objects)**
+**Lesson 2. [Transform objects](./transforming-objects)**
 
 Things start to get more fun here. What does it take to transform objects in space? You get to know about moving objects in accordance with different axes. 
 
-**Lession 3. [Animations](./tree/main/animations)**
+**Lession 3. [Animations](./animations)**
 
 What if you want to move your objects not just one time but in indefinite loops? That's when we need animations.

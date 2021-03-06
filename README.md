@@ -18,3 +18,13 @@ Things start to get more fun here. What does it take to transform objects in spa
 **Lession 3. [Animations](./animations)**
 
 What if you want to move your objects not just one time but in indefinite loops? That's when we need animations.
+
+**Lession 4. [Cameras](./cameras)**
+
+At some point you also want to be able to control your camera: how to position and move it during the animation. 
+
+**Lession 5. [Fullscreen and Resizing](./fullscreen-and-resizing)**
+
+Ahhh, responsiveness... The elephant in the room. As a developer, you will want your objects to be able to maintain its <b>pixel ratio</b> when you resize your screen or to make it your renderer compatiable with your computer capacity.
+
+

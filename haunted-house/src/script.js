@@ -23,6 +23,7 @@ scene.fog = fog
  * Textures
  */
 const textureLoader = new THREE.TextureLoader()
+
 const doorColorTexture = textureLoader.load('/textures/door/color.jpg')
 const doorAlphaTexture = textureLoader.load('/textures/door/alpha.jpg')
 const doorAmbientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
@@ -37,10 +38,12 @@ const bricksAmbientOcclusionTexture = textureLoader.load('/textures/bricks/ambie
 const bricksNormalTexture = textureLoader.load('/textures/bricks/normal.jpg')
 const bricksRoughnessTexture = textureLoader.load('/textures/bricks/roughness.jpg')
 
-const grassColorTexture = textureLoader.load('/textures/grass/color.jpg')
-const grassAmbientOcclusionTexture = textureLoader.load('/textures/grass/ambientOcclusion.jpg')
-const grassNormalTexture = textureLoader.load('/textures/grass/normal.jpg')
-const grassRoughnessTexture = textureLoader.load('/textures/grass/roughness.jpg')
+const grassColorTexture = textureLoader.load('/textures/forest/color.png')
+const grassAmbientOcclusionTexture = textureLoader.load('/textures/forest/ambientOcclusion.png')
+const grassNormalTexture = textureLoader.load('/textures/forest/normal.png')
+const grassRoughnessTexture = textureLoader.load('/textures/forest/roughness.png')
+const grassMetalnessTexture = textureLoader.load('/textures/forest/metalness.png')
+const grassHeightTexture = textureLoader.load('/textures/forest/height.png')
 
 grassColorTexture.repeat.set(8, 8)
 grassAmbientOcclusionTexture.repeat.set(8, 8)
@@ -82,10 +85,10 @@ house.add(walls)
 
 //Roof 
 const roof = new THREE.Mesh(
-    new THREE.ConeBufferGeometry(3.5, 1, 4),
+    new THREE.ConeBufferGeometry(3.5, 2, 4),
     new THREE.MeshStandardMaterial({ color: '#b35f45' })
 )
-roof.position.y = 2.5 + 0.5
+roof.position.y = 2.5 + 1
 roof.rotation.y = Math.PI / 4
 house.add(roof)
 
@@ -112,6 +115,29 @@ door.position.y = 1
 door.position.z = 4/2 + 0.01
 house.add(door)
 
+//Window 
+
+const frontWindow = new THREE.Group()
+
+const frontWindowSquare = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry(0.7, 0.7),
+    new THREE.MeshStandardMaterial({ 
+        color: 0xffffff
+    })
+)
+const frontWindowTop = new THREE.Mesh(
+    new THREE.CircleBufferGeometry(0.35, 32, 0, 3.1),
+    new THREE.MeshStandardMaterial({ 
+        color: 0xffffff
+    })
+)
+frontWindowTop.position.y = 0.3
+
+frontWindow.add(frontWindowSquare, frontWindowTop)
+frontWindow.position.y = 1.5
+frontWindow.position.x = 1.4
+frontWindow.position.z = 4/2 + 0.02
+house.add(frontWindow)
 //Bushes 
 
 const bushGeometry = new THREE.SphereBufferGeometry(1, 16, 16)
@@ -139,8 +165,10 @@ house.add(bushOne, bushTwo, bushThree, bushFour)
 const graves = new THREE.Group()
 scene.add(graves)
 
-const graveGeometry = new THREE.BoxBufferGeometry(0.6, 0.8, 0.2)
+const graveVerticalGeometry = new THREE.BoxBufferGeometry(0.2, 1.2, 0.2)
 const graveMaterial = new THREE.MeshStandardMaterial({ color: '#b2b6b1'})
+const graveHorizontalGeometry = new THREE.BoxBufferGeometry(0.6, 0.2, 0.2)
+
 
 for(let i = 0; i < 50; i++) {
     const angle = Math.random() * Math.PI * 2
@@ -148,8 +176,13 @@ for(let i = 0; i < 50; i++) {
     const x = Math.sin(angle) * radius
     const z = Math.cos(angle) * radius
 
-    const grave = new THREE.Mesh(graveGeometry, graveMaterial)
+    const grave = new THREE.Group()
+    const graveVerticalSquare = new THREE.Mesh(graveVerticalGeometry, graveMaterial)
+    const graveHorizontalSquare = new THREE.Mesh(graveHorizontalGeometry, graveMaterial)
+    graveHorizontalSquare.position.y = 0.25
+    grave.add(graveVerticalSquare, graveHorizontalSquare)
     grave.position.set(x, 0.3, z)
+
     grave.rotation.y = (Math.random() - 0.5) * 0.4
     grave.rotation.z = (Math.random() - 0.5) * 0.4
     grave.castShadow = true
@@ -163,7 +196,11 @@ const floor = new THREE.Mesh(
         map: grassColorTexture,
         aoMap: grassAmbientOcclusionTexture,
         normalMap: grassNormalTexture,
-        roughnessMap: grassRoughnessTexture
+        roughnessMap: grassRoughnessTexture,
+        metalnessMap: grassMetalnessTexture,
+        transparent: true,
+        displacementMap: grassHeightTexture,
+        displacementScale: 0.1,
     })
 )
 floor.geometry.setAttribute('uv2', 
@@ -200,13 +237,23 @@ house.add(doorLight)
 /**
  * Sizes
  */
-const ghostOne = new THREE.PointLight('#ff00ff', 2, 3)
+const ghostOne = new THREE.PointLight(0x751b1b, 2, 3)
+const parameters = {
+    color: 0x751b1b
+}
+gui
+    .addColor(parameters, 'color')
+    .onChange(() => {
+        ghostOne.color.set(parameters.color)
+    })
+    .name('ghostOne color')
+// const ghostTwo = new THREE.PointLight(0x2d5cb6, 2, 3)
 
-const ghostTwo = new THREE.PointLight('#00ffff', 2, 3)
+// const ghostThree = new THREE.PointLight(0x72807, 2, 3)
 
-const ghostThree = new THREE.PointLight('#ffff00', 2, 3)
-
-scene.add(ghostOne, ghostTwo, ghostThree)
+scene.add(ghostOne, 
+    // ghostTwo, ghostThree
+    )
 /**
  * Sizes
  */
@@ -262,8 +309,8 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap
 moonLight.castShadow = true
 doorLight.castShadow = true
 ghostOne.castShadow = true
-ghostTwo.castShadow = true
-ghostThree.castShadow = true
+// ghostTwo.castShadow = true
+// ghostThree.castShadow = true
 
 walls.castShadow = true
 bushOne.castShadow = true
@@ -283,13 +330,13 @@ ghostOne.shadow.mapSize.width = 256
 ghostOne.shadow.mapSize.height = 256
 ghostOne.shadow.camera.far = 7
 
-ghostTwo.shadow.mapSize.width = 256
-ghostTwo.shadow.mapSize.height = 256
-ghostTwo.shadow.camera.far = 7
+// ghostTwo.shadow.mapSize.width = 256
+// ghostTwo.shadow.mapSize.height = 256
+// ghostTwo.shadow.camera.far = 7
 
-ghostThree.shadow.mapSize.width = 256
-ghostThree.shadow.mapSize.height = 256
-ghostThree.shadow.camera.far = 7
+// ghostThree.shadow.mapSize.width = 256
+// ghostThree.shadow.mapSize.height = 256
+// ghostThree.shadow.camera.far = 7
 
 /**
  * Animate
@@ -306,15 +353,15 @@ const tick = () =>
     ghostOne.position.z = Math.cos(ghostOneAngle) * 4
     ghostOne.position.y = Math.sin(elapsedTime * 3)
 
-    const ghostTwoAngle = - elapsedTime * 0.32
-    ghostTwo.position.x = Math.sin(ghostTwoAngle) * 5
-    ghostTwo.position.z = Math.cos(ghostTwoAngle) * 5
-    ghostTwo.position.y = Math.sin(elapsedTime * 3)
+    // const ghostTwoAngle = - elapsedTime * 0.32
+    // ghostTwo.position.x = Math.sin(ghostTwoAngle) * 5
+    // ghostTwo.position.z = Math.cos(ghostTwoAngle) * 5
+    // ghostTwo.position.y = Math.sin(elapsedTime * 3)
 
-    const ghostThreeAngle = - elapsedTime * 0.18
-    ghostThree.position.x = Math.cos(ghostThreeAngle) * (7 + Math.sin(elapsedTime * 0.32))
-    ghostThree.position.z = Math.sin(ghostThreeAngle) * (7 + Math.sin(elapsedTime * 0.5))
-    ghostThree.position.y = Math.sin(elapsedTime * 5) + Math.sin(elapsedTime * 2)
+    // const ghostThreeAngle = - elapsedTime * 0.18
+    // ghostThree.position.x = Math.cos(ghostThreeAngle) * (7 + Math.sin(elapsedTime * 0.32))
+    // ghostThree.position.z = Math.sin(ghostThreeAngle) * (7 + Math.sin(elapsedTime * 0.5))
+    // ghostThree.position.y = Math.sin(elapsedTime * 5) + Math.sin(elapsedTime * 2)
     // Update controls
     controls.update()
 
